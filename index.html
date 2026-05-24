@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Flousi Drive — كيفاش تربح بزاف</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { cairo: ['Cairo','sans-serif'], mono: ['IBM Plex Mono','monospace'] },
+      colors: {
+        brand: { DEFAULT:'#00C97B', dark:'#009B5E', light:'#E6FFF4' },
+        ink:   { DEFAULT:'#0D1117', 2:'#1A2332', 3:'#243043' },
+        muted: '#8899AA',
+        warn:  '#F5A623',
+        danger:'#E5534B',
+        card:  '#141D2B',
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --brand: #00C97B;
+    --brand-dark: #009B5E;
+    --ink: #0D1117;
+    --card: #141D2B;
+    --card2: #1A2332;
+    --text: #E8F0F8;
+    --muted: #8899AA;
+    --warn: #F5A623;
+    --danger: #E5534B;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--ink); color: var(--text); font-family: 'Cairo', sans-serif; overflow: hidden; }
+  #app { height: 100%; display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; position: relative; overflow: hidden; }
+
+  /* SCREENS */
+  .screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s ease;
+  }
+  .screen.hidden { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+  .screen.slide-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+
+  /* SCROLLABLE CONTENT */
+  .scroll-area {
+    flex: 1;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: calc(88px + var(--safe-bot));
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* BOTTOM NAV */
+  #bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--card); border-top: 1px solid #1E2D3D; padding-bottom: var(--safe-bot); z-index: 100; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; color: var(--muted); transition: color .2s; }
+  .nav-btn.active { color: var(--brand); }
+  .nav-btn svg { width: 22px; height: 22px; }
+  .nav-label { font-size: 10px; font-weight: 600; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: 16px; padding: 16px; }
+  .card-sm { background: var(--card2); border-radius: 12px; padding: 12px; }
+
+  /* BUTTONS */
+  .btn-primary { background: var(--brand); color: #000; font-weight: 700; border-radius: 14px; padding: 14px 24px; font-size: 16px; font-family: 'Cairo', sans-serif; width: 100%; cursor: pointer; border: none; transition: opacity .15s, transform .1s; active:opacity-80; }
+  .btn-primary:active { transform: scale(.97); opacity: .9; }
+  .btn-secondary { background: var(--card2); color: var(--text); font-weight: 600; border-radius: 14px; padding: 14px 24px; font-size: 15px; font-family: 'Cairo', sans-serif; width: 100%; cursor: pointer; border: 1px solid #1E2D3D; transition: opacity .15s; }
+  .btn-secondary:active { opacity: .7; }
+  .btn-danger { background: #2D1A1A; color: var(--danger); font-weight: 700; border-radius: 14px; padding: 14px 24px; font-size: 16px; font-family: 'Cairo', sans-serif; width: 100%; cursor: pointer; border: 1px solid #4A2020; transition: opacity .15s; }
+
+  /* SHIFT ACTIVE SCREEN BACKGROUND */
+  .shift-bg {
+    background: linear-gradient(160deg, #003D25 0%, #001A10 50%, #0D1117 100%);
+  }
+
+  /* STAT PILL */
+  .stat-pill { background: rgba(0,201,123,.12); border: 1px solid rgba(0,201,123,.25); border-radius: 10px; padding: 10px 14px; }
+
+  /* PROGRESS BAR */
+  .progress-track { background: #1A2332; border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand-dark), var(--brand)); border-radius: 99px; transition: width .6s ease; }
+
+  /* PLATFORM BADGE */
+  .platform-badge { font-size: 10px; font-weight: 700; border-radius: 6px; padding: 2px 7px; }
+  .badge-indrive { background:#1B2FFF22; color:#6B8CFF; border: 1px solid #1B2FFF44;}
+  .badge-careem  { background:#1A3B2022; color:#43C464; border: 1px solid #43C46433;}
+  .badge-uber    { background:#1C1C1C; color:#bbb; border:1px solid #333;}
+  .badge-yango   { background:#FF330022; color:#FF7766; border:1px solid #FF330044;}
+  .badge-heetch  { background:#66008822; color:#CC66FF; border:1px solid #66008844;}
+
+  /* INPUT */
+  .input-field { background: var(--card2); border: 1px solid #1E2D3D; border-radius: 12px; padding: 13px 15px; color: var(--text); font-family: 'Cairo',sans-serif; font-size: 16px; width: 100%; outline: none; transition: border-color .2s; }
+  .input-field:focus { border-color: var(--brand); }
+  .input-field::placeholder { color: var(--muted); }
+
+  /* NUMPAD */
+  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .numpad-key { background: var(--card2); border: 1px solid #1E2D3D; border-radius: 14px; padding: 17px; font-size: 20px; font-weight: 600; color: var(--text); cursor: pointer; transition: background .1s; text-align: center; font-family: 'IBM Plex Mono',monospace; }
+  .numpad-key:active { background: #243043; }
+  .numpad-key.special { font-size: 14px; color: var(--muted); }
+  .numpad-key.done { background: var(--brand); color: #000; font-size: 14px; font-weight: 700; }
+
+  /* ALERT LEVELS */
+  .alert-yellow { background: #2A2000; border: 1px solid #F5A62355; color: var(--warn); }
+  .alert-orange  { background: #2A1400; border: 1px solid #FF750055; color: #FF7500; }
+  .alert-red    { background: #2A0000; border: 1px solid var(--danger); color: var(--danger); }
+
+  /* TOGGLE */
+  .toggle { position: relative; width: 48px; height: 26px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: #243043; border-radius: 99px; cursor: pointer; transition: background .2s; }
+  .toggle-slider:before { content:''; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform .2s; }
+  .toggle input:checked + .toggle-slider { background: var(--brand); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
+
+  /* PULSE ANIMATION */
+  @keyframes pulse-brand { 0%,100%{ box-shadow: 0 0 0 0 rgba(0,201,123,.4); } 50%{ box-shadow: 0 0 0 14px rgba(0,201,123,0); } }
+  .pulse-brand { animation: pulse-brand 2s infinite; }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+  .spin-slow { animation: spin-slow 8s linear infinite; }
+  @keyframes count-up { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+  .count-up { animation: count-up .4s ease; }
+  @keyframes fade-in { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: none; } }
+  .fade-in { animation: fade-in .4s ease forwards; }
+
+  /* HEADER */
+  .header { padding: calc(var(--safe-top) + 14px) 20px 14px; display: flex; align-items: center; justify-content: space-between; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: #1E2D3D; margin: 0 20px; }
+
+  /* VEHICLE SELECT CHIP */
+  .vehicle-chip { background: var(--card2); border: 2px solid #1E2D3D; border-radius: 12px; padding: 10px 14px; cursor: pointer; transition: border-color .2s, background .2s; text-align: center; }
+  .vehicle-chip.selected { border-color: var(--brand); background: rgba(0,201,123,.08); }
+
+  /* TRIP ROW */
+  .trip-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1A2332; }
+  .trip-row:last-child { border-bottom: none; }
+
+  /* SECTION HEADER */
+  .section-hdr { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: 18px 20px 8px; }
+
+  /* INDRIVER DEBT BAR */
+  .debt-bar { border-radius: 12px; padding: 14px 16px; }
+
+  /* TOAST */
+  #toast { position: fixed; top: calc(var(--safe-top) + 10px); left: 50%; transform: translateX(-50%) translateY(-80px); background: #1A2332; color: #fff; padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform .3s ease; border: 1px solid #243043; white-space: nowrap; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ONBOARDING */
+  .onboard-step { display: none; }
+  .onboard-step.active { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- ═══════════════ SCREEN: ONBOARDING ═══════════════ -->
+  <div id="screen-onboard" class="screen" style="background:var(--ink); padding-top: var(--safe-top);">
+    <div style="flex:1; overflow-y:scroll; -webkit-overflow-scrolling:touch; padding: 24px 24px 40px;">
+
+      <!-- Step 1: Welcome -->
+      <div class="onboard-step active flex flex-col justify-between h-full" id="ob-1">
+        <div class="flex-1 flex flex-col items-center justify-center gap-6 text-center">
+          <div class="w-20 h-20 rounded-2xl flex items-center justify-center pulse-brand" style="background:linear-gradient(135deg,#00C97B,#009B5E)">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div>
+            <h1 class="text-3xl font-black" style="color:var(--brand)">Flousi Drive</h1>
+            <p class="text-base mt-1" style="color:var(--muted)">كيفاش تربح بزاف</p>
+          </div>
+          <div class="card w-full text-right">
+            <p class="text-lg font-bold mb-2">مرحبا بيك 👋</p>
+            <p style="color:var(--muted); line-height:1.7; font-size:14px;">Flousi Drive كيساعدك تشوف فلوسك الحقيقية بعد خصم الكاربوران والكوميسيون</p>
+          </div>
+        </div>
+        <button class="btn-primary mt-6" onclick="goToStep(2)">ابدا دبا</button>
+      </div>
+
+      <!-- Step 2: Vehicle -->
+      <div class="onboard-step flex flex-col h-full" id="ob-2">
+        <div class="mb-6">
+          <div class="mb-6">
+            <h2 class="text-2xl font-black mb-1">شنو هي طوموبيلتك؟</h2>
+            <p style="color:var(--muted); font-size:13px;">خترها باش نحسبوا الكاربوران ديالك</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3" id="vehicle-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+        <div class="pt-4 pb-2 flex flex-col gap-3">
+          <div>
+            <label class="text-sm mb-1 block" style="color:var(--muted)">سعر الكازوال / الإيسونس (درهم)</label>
+            <input id="fuel-price-input" type="number" class="input-field" placeholder="مثلاً: 14.50" value="14.50" inputmode="decimal" />
+          </div>
+          <button class="btn-primary" onclick="saveVehicle()">التالي</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Daily Target -->
+      <div class="onboard-step flex flex-col h-full" id="ob-3">
+        <div class="flex-1 flex flex-col items-center justify-center gap-5">
+          <div class="text-center mb-2">
+            <h2 class="text-2xl font-black mb-1">شحال بغيتي تربح كل نهار؟</h2>
+            <p style="color:var(--muted); font-size:13px;">هذا هو target ديالك الربح الصافي</p>
+          </div>
+          <div class="card w-full">
+            <p id="target-display" class="text-center text-5xl font-black mb-1" style="color:var(--brand); font-family:'IBM Plex Mono'">200</p>
+            <p class="text-center text-sm" style="color:var(--muted)">درهم صافي</p>
+            <div class="numpad mt-4" id="target-numpad">
+              <div class="numpad-key" onclick="targetKey('1')">1</div>
+              <div class="numpad-key" onclick="targetKey('2')">2</div>
+              <div class="numpad-key" onclick="targetKey('3')">3</div>
+              <div class="numpad-key" onclick="targetKey('4')">4</div>
+              <div class="numpad-key" onclick="targetKey('5')">5</div>
+              <div class="numpad-key" onclick="targetKey('6')">6</div>
+              <div class="numpad-key" onclick="targetKey('7')">7</div>
+              <div class="numpad-key" onclick="targetKey('8')">8</div>
+              <div class="numpad-key" onclick="targetKey('9')">9</div>
+              <div class="numpad-key special" onclick="targetKey('clear')">مسح</div>
+              <div class="numpad-key" onclick="targetKey('0')">0</div>
+              <div class="numpad-key special" onclick="targetKey('back')">⌫</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary mt-4" onclick="finishOnboarding()">يالا نبدا ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN: HOME DASHBOARD ═══════════════ -->
+  <div id="screen-home" class="screen hidden">
+    <!-- SHIFT ACTIVE STATE -->
+    <div id="shift-active-view" style="display:none; flex-direction:column;" class="shift-bg flex-1 overflow-hidden">
+      <div class="header">
+        <div>
+          <p class="text-xs font-bold" style="color:rgba(0,201,123,.7)">SHIFT جارية ●</p>
+          <p id="shift-timer" class="font-mono text-2xl font-black" style="color:var(--brand)">00:00:00</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs" style="color:var(--muted)">KM</p>
+          <p id="shift-km" class="font-mono text-xl font-black">0.0</p>
+        </div>
+      </div>
+
+      <!-- BIG NET PROFIT -->
+      <div class="flex flex-col items-center justify-center py-6">
+        <p class="text-sm mb-2" style="color:rgba(0,201,123,.7); letter-spacing:.05em">الربح الصافي</p>
+        <div class="flex items-end gap-2">
+          <p id="live-net" class="font-mono font-black" style="font-size:72px; line-height:1; color:#fff; text-shadow: 0 0 40px rgba(0,201,123,.4)">0</p>
+          <p class="text-2xl font-bold mb-2" style="color:var(--muted)">درهم</p>
+        </div>
+        <!-- Goal progress -->
+        <div class="w-full px-6 mt-4">
+          <div class="flex justify-between text-xs mb-2" style="color:var(--muted)">
+            <span>الهدف</span>
+            <span id="goal-pct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="goal-bar" style="width:0%"></div>
+          </div>
+          <p id="goal-remaining" class="text-xs mt-1 text-center" style="color:var(--muted)"></p>
+        </div>
+      </div>
+
+      <!-- MINI STATS -->
+      <div class="grid grid-cols-3 gap-2 px-4 mb-4">
+        <div class="stat-pill text-center">
+          <p id="stat-gross" class="font-mono font-bold text-lg">0</p>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">دخل خام</p>
+        </div>
+        <div class="stat-pill text-center">
+          <p id="stat-trips" class="font-mono font-bold text-lg">0</p>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">رحلة</p>
+        </div>
+        <div class="stat-pill text-center">
+          <p id="stat-fuel-cost" class="font-mono font-bold text-lg text-yellow-400">0</p>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">كاربوران</p>
+        </div>
+      </div>
+
+      <!-- inDRIVE DEBT -->
+      <div id="indrive-debt-banner" class="mx-4 mb-3 rounded-xl p-3 hidden alert-yellow">
+        <div class="flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <p class="text-xs font-bold">inDrive — خصاك تشارج</p>
+            <p id="debt-amount" class="font-mono font-black text-base">0 درهم</p>
+          </div>
+          <button onclick="resetDebt()" class="mr-auto text-xs px-3 py-1 rounded-lg" style="background:rgba(255,255,255,.1)">وفيت</button>
+        </div>
+      </div>
+
+      <div class="px-4 mt-auto mb-4">
+        <button class="btn-danger" onclick="endShift()">
+          <span class="text-lg">⏹ وقف الخدمة</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SHIFT INACTIVE STATE -->
+    <div id="shift-inactive-view" style="flex-direction:column; display:flex;" class="flex-1 overflow-hidden">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <p style="color:var(--muted); font-size:12px;">أهلاً،</p>
+          <p class="text-xl font-black">Flousi Drive 🚗</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs" style="color:var(--muted)" id="home-date"></p>
+        </div>
+      </div>
+
+      <div class="scroll-area px-4">
+        <!-- Today Summary Card -->
+        <div class="card mb-3">
+          <p class="text-xs font-bold mb-3" style="color:var(--muted)">ملخص اليوم</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <p id="today-net" class="font-mono font-black text-2xl" style="color:var(--brand)">0</p>
+              <p class="text-xs" style="color:var(--muted)">صافي (درهم)</p>
+            </div>
+            <div>
+              <p id="today-trips" class="font-mono font-black text-2xl">0</p>
+              <p class="text-xs" style="color:var(--muted)">رحلة</p>
+            </div>
+            <div>
+              <p id="today-hours" class="font-mono font-black text-2xl">0.0</p>
+              <p class="text-xs" style="color:var(--muted)">ساعة</p>
+            </div>
+          </div>
+          <!-- Goal progress -->
+          <div class="mt-3">
+            <div class="flex justify-between text-xs mb-1" style="color:var(--muted)">
+              <span>الهدف اليومي</span>
+              <span id="today-goal-label">0 / 0 درهم</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="today-goal-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- inDrive Debt Tracker -->
+        <div id="debt-card" class="debt-bar mb-3 alert-yellow" style="display:none">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold">inDrive — خصاك تشارج</p>
+              <p id="debt-card-amount" class="font-mono font-black text-2xl">0 درهم</p>
+            </div>
+            <button onclick="resetDebt()" class="btn-secondary text-sm" style="width:auto; padding:8px 14px">وفيت ✓</button>
+          </div>
+        </div>
+
+        <!-- Last 3 Trips -->
+        <div class="card mb-3">
+          <p class="text-xs font-bold mb-2" style="color:var(--muted)">آخر الرحلات</p>
+          <div id="recent-trips-list">
+            <p class="text-sm text-center py-4" style="color:var(--muted)">ما كاينش رحلات ليوم</p>
+          </div>
+        </div>
+
+        <!-- Start Shift CTA -->
+        <button class="btn-primary py-5 text-xl font-black mt-2" onclick="startShift()" id="start-btn">
+          <span>🚀 بدا الخدمة</span>
+        </button>
+        <p class="text-xs text-center mt-2 mb-2" style="color:var(--muted)">سيبدا التتبع أوتوماتيكي</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN: ADD TRIP ═══════════════ -->
+  <div id="screen-trip" class="screen hidden slide-right">
+    <div class="header">
+      <button onclick="showScreen('home')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--card2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <h2 class="text-lg font-black">سجل رحلة</h2>
+      <div class="w-10"></div>
+    </div>
+
+    <div class="scroll-area px-4">
+      <!-- Fare numpad -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">أجرة الراكب (درهم)</p>
+        <p id="fare-display" class="font-mono font-black text-center mb-4" style="font-size:52px; color:var(--brand)">0</p>
+        <div class="numpad">
+          <div class="numpad-key" onclick="fareKey('1')">1</div>
+          <div class="numpad-key" onclick="fareKey('2')">2</div>
+          <div class="numpad-key" onclick="fareKey('3')">3</div>
+          <div class="numpad-key" onclick="fareKey('4')">4</div>
+          <div class="numpad-key" onclick="fareKey('5')">5</div>
+          <div class="numpad-key" onclick="fareKey('6')">6</div>
+          <div class="numpad-key" onclick="fareKey('7')">7</div>
+          <div class="numpad-key" onclick="fareKey('8')">8</div>
+          <div class="numpad-key" onclick="fareKey('9')">9</div>
+          <div class="numpad-key special" onclick="fareKey('.')">.</div>
+          <div class="numpad-key" onclick="fareKey('0')">0</div>
+          <div class="numpad-key special" onclick="fareKey('back')">⌫</div>
+        </div>
+      </div>
+
+      <!-- Platform -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">التطبيق</p>
+        <div class="grid grid-cols-5 gap-2" id="platform-select">
+          <button class="vehicle-chip selected text-xs font-bold" data-platform="inDrive" onclick="selectPlatform(this)">inDrive</button>
+          <button class="vehicle-chip text-xs font-bold" data-platform="Careem" onclick="selectPlatform(this)">Careem</button>
+          <button class="vehicle-chip text-xs font-bold" data-platform="Uber" onclick="selectPlatform(this)">Uber</button>
+          <button class="vehicle-chip text-xs font-bold" data-platform="Yango" onclick="selectPlatform(this)">Yango</button>
+          <button class="vehicle-chip text-xs font-bold" data-platform="Heetch" onclick="selectPlatform(this)">Heetch</button>
+        </div>
+      </div>
+
+      <!-- Payment type -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">طريقة الأداء</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="vehicle-chip selected font-bold" id="pay-cash" onclick="selectPayment('cash')">💵 كاش</button>
+          <button class="vehicle-chip font-bold" id="pay-card" onclick="selectPayment('card')">💳 كارطة</button>
+        </div>
+      </div>
+
+      <!-- Distance -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">المسافة (كم) — اختياري</p>
+        <input id="trip-km-input" type="number" class="input-field" placeholder="مثلاً: 8.5" inputmode="decimal" />
+      </div>
+
+      <button class="btn-primary mb-6" onclick="saveTrip()">✓ سجل الرحلة</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN: NEGOTIATOR ═══════════════ -->
+  <div id="screen-neg" class="screen hidden slide-right">
+    <div class="header">
+      <button onclick="showScreen('home')" class="w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--card2)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <h2 class="text-lg font-black">Négociateur inDrive</h2>
+      <div class="w-10"></div>
+    </div>
+
+    <div class="scroll-area px-4">
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">المسافة (كم)</p>
+        <p id="neg-km-display" class="font-mono font-black text-center mb-4" style="font-size:44px; color:var(--text)">0</p>
+        <div class="numpad">
+          <div class="numpad-key" onclick="negKey('1')">1</div>
+          <div class="numpad-key" onclick="negKey('2')">2</div>
+          <div class="numpad-key" onclick="negKey('3')">3</div>
+          <div class="numpad-key" onclick="negKey('4')">4</div>
+          <div class="numpad-key" onclick="negKey('5')">5</div>
+          <div class="numpad-key" onclick="negKey('6')">6</div>
+          <div class="numpad-key" onclick="negKey('7')">7</div>
+          <div class="numpad-key" onclick="negKey('8')">8</div>
+          <div class="numpad-key" onclick="negKey('9')">9</div>
+          <div class="numpad-key special" onclick="negKey('.')">.</div>
+          <div class="numpad-key" onclick="negKey('0')">0</div>
+          <div class="numpad-key special" onclick="negKey('back')">⌫</div>
+        </div>
+      </div>
+
+      <!-- Retour à vide toggle -->
+      <div class="card mb-4 flex items-center justify-between">
+        <div>
+          <p class="font-bold">Retour à vide</p>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">رجعة فراغ — ضاعف الكاربوران</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="retour-toggle" onchange="calcNeg()" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- Min profit -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">الربح الدني (درهم)</p>
+        <input id="neg-min-profit" type="number" class="input-field" value="15" inputmode="decimal" oninput="calcNeg()" />
+      </div>
+
+      <!-- Result -->
+      <div id="neg-result" class="card mb-4 hidden">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="text-center">
+            <p class="text-xs mb-1" style="color:var(--muted)">سعر الحد الأدنى</p>
+            <p id="neg-min-price" class="font-mono font-black text-3xl" style="color:var(--danger)">—</p>
+            <p class="text-xs" style="color:var(--muted)">درهم</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs mb-1" style="color:var(--muted)">السعر المقترح</p>
+            <p id="neg-suggested" class="font-mono font-black text-3xl" style="color:var(--brand)">—</p>
+            <p class="text-xs" style="color:var(--muted)">درهم</p>
+          </div>
+        </div>
+        <div id="neg-breakdown" class="mt-3 pt-3" style="border-top:1px solid #1E2D3D; font-size:12px; color:var(--muted); line-height:2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN: STATS ═══════════════ -->
+  <div id="screen-stats" class="screen hidden slide-right">
+    <div class="header">
+      <p class="text-xl font-black">إحصائيات</p>
+      <button onclick="clearAllData()" class="text-xs px-3 py-1.5 rounded-lg" style="color:var(--danger); background:#2D1A1A; border:1px solid #4A2020">مسح</button>
+    </div>
+
+    <div class="scroll-area px-4">
+      <!-- Overall stats -->
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="card text-center">
+          <p id="stats-total-net" class="font-mono font-black text-2xl" style="color:var(--brand)">0</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">إجمالي الربح الصافي</p>
+        </div>
+        <div class="card text-center">
+          <p id="stats-total-trips" class="font-mono font-black text-2xl">0</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">إجمالي الرحلات</p>
+        </div>
+        <div class="card text-center">
+          <p id="stats-avg-fare" class="font-mono font-black text-2xl">0</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">معدل الأجرة</p>
+        </div>
+        <div class="card text-center">
+          <p id="stats-total-km" class="font-mono font-black text-2xl">0</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">إجمالي KM</p>
+        </div>
+      </div>
+
+      <!-- Platform breakdown -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">التفصيل حسب التطبيق</p>
+        <div id="platform-breakdown">
+          <p class="text-sm text-center py-2" style="color:var(--muted)">ما كاينش بيانات</p>
+        </div>
+      </div>
+
+      <!-- Shift history -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">تاريخ الخدمات</p>
+        <div id="shift-history-list">
+          <p class="text-sm text-center py-2" style="color:var(--muted)">ما كاينش خدمات</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN: SETTINGS ═══════════════ -->
+  <div id="screen-settings" class="screen hidden slide-right">
+    <div class="header">
+      <p class="text-xl font-black">الإعدادات</p>
+    </div>
+
+    <div class="scroll-area px-4">
+      <!-- Vehicle info -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">السيارة</p>
+        <div id="current-vehicle-info" class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--card2)">🚗</div>
+          <div>
+            <p class="font-bold text-sm" id="settings-vehicle-name">—</p>
+            <p class="text-xs" style="color:var(--muted)" id="settings-vehicle-cons">—</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2" id="settings-vehicle-grid"></div>
+      </div>
+
+      <!-- Fuel price -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">سعر الكاربوران (درهم/لتر)</p>
+        <input id="settings-fuel-price" type="number" class="input-field" inputmode="decimal" onchange="saveFuelPrice()" />
+      </div>
+
+      <!-- Daily target -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">الهدف اليومي (درهم صافي)</p>
+        <input id="settings-daily-target" type="number" class="input-field" inputmode="decimal" onchange="saveDailyTarget()" />
+      </div>
+
+      <!-- inDrive commission -->
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-2" style="color:var(--muted)">كوميسيون inDrive (%)</p>
+        <input id="settings-commission" type="number" class="input-field" value="10" inputmode="decimal" onchange="saveCommission()" />
+      </div>
+
+      <div class="card mb-4">
+        <p class="text-xs font-bold mb-3" style="color:var(--muted)">الإصدار</p>
+        <p class="text-sm" style="color:var(--muted)">Flousi Drive v1.0.0 MVP</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+  <nav id="bottom-nav" class="hidden">
+    <div class="flex">
+      <button class="nav-btn active" data-nav="home" onclick="showScreen('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="nav-label">الرئيسية</span>
+      </button>
+      <button class="nav-btn" data-nav="trip" onclick="showScreen('trip')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span class="nav-label">رحلة</span>
+      </button>
+      <button class="nav-btn" data-nav="neg" onclick="showScreen('neg')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="nav-label">نيغو</span>
+      </button>
+      <button class="nav-btn" data-nav="stats" onclick="showScreen('stats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="nav-label">إحصاء</span>
+      </button>
+      <button class="nav-btn" data-nav="settings" onclick="showScreen('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="nav-label">إعدادات</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const VEHICLES = [
+  { id:'logan',   name:'Dacia Logan 1.5 dCi',   cons:5.2, icon:'🚗' },
+  { id:'sandero', name:'Dacia Sandero 1.5 dCi',  cons:5.5, icon:'🚗' },
+  { id:'symbol',  name:'Renault Symbol 1.5 dCi', cons:5.3, icon:'🚗' },
+  { id:'i10',     name:'Hyundai i10 1.0',         cons:6.1, icon:'🚙' },
+  { id:'astra',   name:'Opel Astra J 1.6',        cons:7.2, icon:'🚙' },
+  { id:'dokker',  name:'Dacia Dokker 1.5 dCi',    cons:5.8, icon:'🚐' },
+  { id:'polo',    name:'VW Polo 1.4',              cons:6.8, icon:'🚗' },
+  { id:'208',     name:'Peugeot 208 1.4 HDi',     cons:5.6, icon:'🚗' },
+  { id:'master',  name:'Renault Master',           cons:8.5, icon:'🚐' },
+  { id:'custom',  name:'سيارة أخرى',              cons:6.5, icon:'🚗' },
+];
+
+const PLATFORM_COMMISSION = { inDrive:10, Careem:12, Uber:25, Yango:12, Heetch:20 };
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  onboarded: false,
+  vehicle: null,
+  fuelPrice: 14.50,
+  dailyTarget: 200,
+  commission: 10,
+  indriveDebt: 0,
+  shiftActive: false,
+  shiftStart: null,
+  shiftKm: 0,
+  trips: [],        // {id, ts, fare, platform, payment, km}
+  shifts: [],       // {date, duration, km, gross, net, fuelCost, tripCount}
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('flousi_state');
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem('flousi_state', JSON.stringify(state));
+}
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+
+function fmtDuration(ms) {
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+  return `${pad2(h)}:${pad2(m%60)}:${pad2(s%60)}`;
+}
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+
+function getTodayTrips() {
+  const today = todayStr();
+  return state.trips.filter(t => t.ts.slice(0,10) === today);
+}
+
+function calcFuelCost(km) {
+  if (!state.vehicle || !km) return 0;
+  return (km * state.vehicle.cons / 100) * state.fuelPrice;
+}
+
+function calcNet(gross, platform, km) {
+  const comm = PLATFORM_COMMISSION[platform] || state.commission;
+  const commAmt = gross * (comm/100);
+  const fuel = calcFuelCost(km || 0);
+  return gross - commAmt - fuel;
+}
+
+// ─── SCREEN ROUTING ──────────────────────────────────────────────────────────
+function showScreen(name) {
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => {
+    const id = s.id.replace('screen-','');
+    if (id === name) {
+      s.classList.remove('hidden','slide-right');
+    } else {
+      s.classList.add('hidden');
+      s.classList.remove('slide-right');
+    }
+  });
+
+  // Update nav
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.nav === name);
+  });
+
+  if (name === 'home') refreshHome();
+  if (name === 'stats') refreshStats();
+  if (name === 'settings') refreshSettings();
+}
+
+// ─── ONBOARDING ──────────────────────────────────────────────────────────────
+let obSelectedVehicle = null;
+let targetRaw = '200';
+
+function goToStep(n) {
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-'+n).classList.add('active');
+  if (n === 2) renderVehicleGrid();
+}
+
+function renderVehicleGrid() {
+  const grid = document.getElementById('vehicle-grid');
+  grid.innerHTML = VEHICLES.map(v => `
+    <div class="vehicle-chip ${obSelectedVehicle?.id===v.id?'selected':''}" onclick="selectObVehicle('${v.id}')">
+      <div class="text-xl mb-1">${v.icon}</div>
+      <p class="text-xs font-bold" style="line-height:1.3">${v.name.split(' ').slice(0,3).join(' ')}</p>
+      <p class="text-xs mt-0.5" style="color:var(--muted)">${v.cons}L/100</p>
+    </div>
+  `).join('');
+}
+
+function selectObVehicle(id) {
+  obSelectedVehicle = VEHICLES.find(v=>v.id===id);
+  renderVehicleGrid();
+}
+
+function saveVehicle() {
+  if (!obSelectedVehicle) { showToast('اختر سيارتك أولاً'); return; }
+  const fp = parseFloat(document.getElementById('fuel-price-input').value) || 14.5;
+  state.vehicle = obSelectedVehicle;
+  state.fuelPrice = fp;
+  saveState();
+  goToStep(3);
+}
+
+function targetKey(k) {
+  if (k === 'clear') targetRaw = '0';
+  else if (k === 'back') targetRaw = targetRaw.length > 1 ? targetRaw.slice(0,-1) : '0';
+  else if (targetRaw === '0') targetRaw = k;
+  else if (targetRaw.length < 5) targetRaw += k;
+  document.getElementById('target-display').textContent = targetRaw;
+}
+
+function finishOnboarding() {
+  state.dailyTarget = parseInt(targetRaw) || 200;
+  state.onboarded = true;
+  saveState();
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  showScreen('home');
+}
+
+// ─── SHIFT TRACKING ──────────────────────────────────────────────────────────
+let shiftInterval = null;
+
+function startShift() {
+  state.shiftActive = true;
+  state.shiftStart = Date.now();
+  state.shiftKm = 0;
+  saveState();
+  document.getElementById('shift-inactive-view').style.display = 'none';
+  document.getElementById('shift-active-view').style.display = 'flex';
+  shiftInterval = setInterval(updateShiftUI, 1000);
+  updateShiftUI();
+  showToast('الخدمة بدات. بالصحة والراحة!🚀');
+}
+
+function updateShiftUI() {
+  if (!state.shiftStart) return;
+  const elapsed = Date.now() - state.shiftStart;
+  document.getElementById('shift-timer').textContent = fmtDuration(elapsed);
+
+  // Simulate km increment (0.1km every 15s for demo)
+  state.shiftKm += 0.007;
+  document.getElementById('shift-km').textContent = state.shiftKm.toFixed(1);
+
+  const todayTrips = getTodayTrips();
+  const gross = todayTrips.reduce((s,t)=>s+t.fare,0);
+  const tripKm = todayTrips.reduce((s,t)=>s+(t.km||0),0);
+  const fuelCost = calcFuelCost(state.shiftKm);
+  const commissions = todayTrips.reduce((s,t)=>s + t.fare*(PLATFORM_COMMISSION[t.platform]||10)/100, 0);
+  const net = gross - commissions - fuelCost;
+
+  document.getElementById('live-net').textContent = Math.max(0,net).toFixed(0);
+  document.getElementById('stat-gross').textContent = gross.toFixed(0);
+  document.getElementById('stat-trips').textContent = todayTrips.length;
+  document.getElementById('stat-fuel-cost').textContent = fuelCost.toFixed(0);
+
+  const pct = state.dailyTarget > 0 ? Math.min(100,(net/state.dailyTarget)*100) : 0;
+  document.getElementById('goal-bar').style.width = pct + '%';
+  document.getElementById('goal-pct').textContent = pct.toFixed(0) + '%';
+  const remaining = Math.max(0, state.dailyTarget - net);
+  document.getElementById('goal-remaining').textContent = remaining > 0 ? `باقي ${remaining.toFixed(0)} درهم` : '✅ وصلتي للهدف!';
+
+  // Debt banner
+  updateDebtUI();
+}
+
+function endShift() {
+  if (!state.shiftStart) return;
+  clearInterval(shiftInterval);
+  const elapsed = Date.now() - state.shiftStart;
+  const todayTrips = getTodayTrips();
+  const gross = todayTrips.reduce((s,t)=>s+t.fare,0);
+  const fuelCost = calcFuelCost(state.shiftKm);
+  const commissions = todayTrips.reduce((s,t)=>s + t.fare*(PLATFORM_COMMISSION[t.platform]||10)/100, 0);
+  const net = gross - commissions - fuelCost;
+
+  state.shifts.push({
+    date: todayStr(),
+    duration: elapsed,
+    km: parseFloat(state.shiftKm.toFixed(1)),
+    gross, net, fuelCost,
+    tripCount: todayTrips.length
+  });
+  state.shiftActive = false;
+  state.shiftStart = null;
+  saveState();
+
+  document.getElementById('shift-inactive-view').style.display = 'flex';
+  document.getElementById('shift-active-view').style.display = 'none';
+  refreshHome();
+  showToast(`الخدمة انتهات. ربحتي ${net.toFixed(0)} درهم صافي 💚`);
+}
+
+// ─── TRIP LOGGING ─────────────────────────────────────────────────────────────
+let fareRaw = '0';
+let selectedPlatform = 'inDrive';
+let selectedPayment = 'cash';
+
+function fareKey(k) {
+  if (k === 'back') fareRaw = fareRaw.length > 1 ? fareRaw.slice(0,-1) : '0';
+  else if (k === '.') { if (!fareRaw.includes('.')) fareRaw += '.'; }
+  else if (fareRaw === '0') fareRaw = k;
+  else if (fareRaw.length < 7) fareRaw += k;
+  document.getElementById('fare-display').textContent = fareRaw;
+}
+
+function selectPlatform(el) {
+  document.querySelectorAll('#platform-select button').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlatform = el.dataset.platform;
+}
+
+function selectPayment(type) {
+  selectedPayment = type;
+  document.getElementById('pay-cash').classList.toggle('selected', type==='cash');
+  document.getElementById('pay-card').classList.toggle('selected', type==='card');
+}
+
+function saveTrip() {
+  const fare = parseFloat(fareRaw) || 0;
+  if (fare <= 0) { showToast('أدخل الأجرة'); return; }
+  const km = parseFloat(document.getElementById('trip-km-input').value) || 0;
+
+  const trip = {
+    id: Date.now(),
+    ts: new Date().toISOString(),
+    fare, platform: selectedPlatform,
+    payment: selectedPayment, km
+  };
+  state.trips.push(trip);
+
+  // Update inDrive debt
+  if (selectedPlatform === 'inDrive') {
+    state.indriveDebt += fare * (state.commission/100);
+  }
+
+  saveState();
+
+  // Reset fare
+  fareRaw = '0';
+  document.getElementById('fare-display').textContent = '0';
+  document.getElementById('trip-km-input').value = '';
+
+  showToast(`رحلة ${fare} درهم — ${selectedPlatform} ✓`);
+  showScreen('home');
+}
+
+// ─── NEGOTIATOR ──────────────────────────────────────────────────────────────
+let negRaw = '0';
+
+function negKey(k) {
+  if (k === 'back') negRaw = negRaw.length > 1 ? negRaw.slice(0,-1) : '0';
+  else if (k === '.') { if (!negRaw.includes('.')) negRaw += '.'; }
+  else if (negRaw === '0') negRaw = k;
+  else if (negRaw.length < 5) negRaw += k;
+  document.getElementById('neg-km-display').textContent = negRaw;
+  calcNeg();
+}
+
+function calcNeg() {
+  const km = parseFloat(negRaw) || 0;
+  if (km <= 0) { document.getElementById('neg-result').classList.add('hidden'); return; }
+
+  const retour = document.getElementById('retour-toggle').checked;
+  const minProfit = parseFloat(document.getElementById('neg-min-profit').value) || 15;
+  const vehicle = state.vehicle || VEHICLES[0];
+  const cons = vehicle.cons;
+  const fuelPerKm = (cons/100) * state.fuelPrice;
+  const tripKm = retour ? km * 2 : km;
+  const fuelCost = tripKm * fuelPerKm;
+  const baseMin = fuelCost + minProfit;
+  const minWithComm = baseMin / (1 - state.commission/100);
+  const suggested = Math.ceil(minWithComm * 1.15 / 5) * 5; // round up to nearest 5
+
+  document.getElementById('neg-result').classList.remove('hidden');
+  document.getElementById('neg-min-price').textContent = Math.ceil(minWithComm);
+  document.getElementById('neg-suggested').textContent = suggested;
+  document.getElementById('neg-breakdown').innerHTML = `
+    <div>⛽ الكاربوران${retour?' (ذهاب+إياب)':''}: ${fuelCost.toFixed(1)} درهم</div>
+    <div>📱 كوميسيون ${state.commission}%: ${(minWithComm*(state.commission/100)).toFixed(1)} درهم</div>
+    <div>💰 ربح دني: ${minProfit} درهم</div>
+    ${retour ? '<div style="color:var(--warn)">🔄 رجعة فراغ محسوبة</div>' : ''}
+  `;
+}
+
+// ─── DEBT ─────────────────────────────────────────────────────────────────────
+function resetDebt() {
+  state.indriveDebt = 0;
+  saveState();
+  updateDebtUI();
+  showToast('تم إعادة تصفير الدين ✓');
+}
+
+function updateDebtUI() {
+  const debt = state.indriveDebt;
+  const banner = document.getElementById('indrive-debt-banner');
+  const card = document.getElementById('debt-card');
+  const txt = `${debt.toFixed(1)} درهم`;
+
+  if (banner) document.getElementById('debt-amount').textContent = txt;
+  if (card) document.getElementById('debt-card-amount').textContent = txt;
+
+  const show = debt > 0;
+  if (banner) banner.classList.toggle('hidden', !show);
+  if (card) card.style.display = show ? 'block' : 'none';
+
+  if (banner) {
+    banner.className = 'mx-4 mb-3 rounded-xl p-3';
+    if (debt >= 70) banner.classList.add('alert-red');
+    else if (debt >= 50) banner.classList.add('alert-orange');
+    else if (debt >= 30) banner.classList.add('alert-yellow');
+    else banner.classList.add('alert-yellow');
+  }
+}
+
+// ─── HOME REFRESH ─────────────────────────────────────────────────────────────
+function refreshHome() {
+  const today = todayStr();
+  const now = new Date();
+  const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const months = ['يناير','فبراير','مارس','أبريل','ماي','يونيو','يوليوز','غشت','شتنبر','أكتوبر','نونبر','دجنبر'];
+  const dateEl = document.getElementById('home-date');
+  if (dateEl) dateEl.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+
+  const todayTrips = getTodayTrips();
+  const todayShifts = state.shifts.filter(s=>s.date===today);
+  const gross = todayTrips.reduce((s,t)=>s+t.fare,0);
+  const commissions = todayTrips.reduce((s,t)=>s+t.fare*(PLATFORM_COMMISSION[t.platform]||10)/100,0);
+  const shiftKm = todayShifts.reduce((s,sh)=>s+sh.km,0);
+  const fuelCost = calcFuelCost(shiftKm);
+  const net = gross - commissions - fuelCost;
+  const hours = todayShifts.reduce((s,sh)=>s+sh.duration,0) / 3600000;
+
+  const netEl = document.getElementById('today-net');
+  if (netEl) netEl.textContent = Math.max(0,net).toFixed(0);
+  const tripsEl = document.getElementById('today-trips');
+  if (tripsEl) tripsEl.textContent = todayTrips.length;
+  const hoursEl = document.getElementById('today-hours');
+  if (hoursEl) hoursEl.textContent = hours.toFixed(1);
+
+  const pct = state.dailyTarget > 0 ? Math.min(100,(net/state.dailyTarget)*100) : 0;
+  const goalBar = document.getElementById('today-goal-bar');
+  if (goalBar) goalBar.style.width = pct + '%';
+  const goalLabel = document.getElementById('today-goal-label');
+  if (goalLabel) goalLabel.textContent = `${Math.max(0,net).toFixed(0)} / ${state.dailyTarget} درهم`;
+
+  // Recent trips
+  const list = document.getElementById('recent-trips-list');
+  if (list) {
+    const recent = [...todayTrips].reverse().slice(0,5);
+    if (recent.length === 0) {
+      list.innerHTML = '<p class="text-sm text-center py-4" style="color:var(--muted)">ما كاينش رحلات ليوم</p>';
+    } else {
+      list.innerHTML = recent.map(t => {
+        const comm = PLATFORM_COMMISSION[t.platform]||10;
+        const net = t.fare - t.fare*(comm/100) - calcFuelCost(t.km||0);
+        const badgeClass = `badge-${t.platform.toLowerCase()}`;
+        return `<div class="trip-row">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm" style="background:var(--card2)">${t.payment==='cash'?'💵':'💳'}</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="platform-badge ${badgeClass}">${t.platform}</span>
+              <span class="text-xs" style="color:var(--muted)">${new Date(t.ts).toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</span>
+            </div>
+            <p class="font-mono font-bold text-sm">${t.fare} درهم خام</p>
+          </div>
+          <div class="text-right">
+            <p class="font-mono font-bold text-sm" style="color:var(--brand)">${net.toFixed(1)}</p>
+            <p class="text-xs" style="color:var(--muted)">صافي</p>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  updateDebtUI();
+
+  // Shift state
+  if (state.shiftActive && state.shiftStart) {
+    document.getElementById('shift-inactive-view').style.display = 'none';
+    document.getElementById('shift-active-view').style.display = 'flex';
+    if (!shiftInterval) {
+      shiftInterval = setInterval(updateShiftUI, 1000);
+    }
+    updateShiftUI();
+  } else {
+    document.getElementById('shift-inactive-view').style.display = 'flex';
+    document.getElementById('shift-active-view').style.display = 'none';
+  }
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function refreshStats() {
+  const allTrips = state.trips;
+  const gross = allTrips.reduce((s,t)=>s+t.fare,0);
+  const commissions = allTrips.reduce((s,t)=>s+t.fare*(PLATFORM_COMMISSION[t.platform]||10)/100,0);
+  const totalKm = state.shifts.reduce((s,sh)=>s+sh.km,0);
+  const fuelCost = calcFuelCost(totalKm);
+  const net = gross - commissions - fuelCost;
+  const tripKm = allTrips.reduce((s,t)=>s+(t.km||0),0);
+
+  document.getElementById('stats-total-net').textContent = net.toFixed(0);
+  document.getElementById('stats-total-trips').textContent = allTrips.length;
+  document.getElementById('stats-avg-fare').textContent = allTrips.length > 0 ? (gross/allTrips.length).toFixed(1) : '0';
+  document.getElementById('stats-total-km').textContent = totalKm.toFixed(0);
+
+  // Platform breakdown
+  const breakdown = {};
+  allTrips.forEach(t => {
+    if (!breakdown[t.platform]) breakdown[t.platform] = {trips:0, gross:0};
+    breakdown[t.platform].trips++;
+    breakdown[t.platform].gross += t.fare;
+  });
+  const bdEl = document.getElementById('platform-breakdown');
+  const platforms = Object.entries(breakdown);
+  if (platforms.length === 0) {
+    bdEl.innerHTML = '<p class="text-sm text-center py-2" style="color:var(--muted)">ما كاينش بيانات</p>';
+  } else {
+    bdEl.innerHTML = platforms.map(([p, d]) => `
+      <div class="flex items-center justify-between py-2" style="border-bottom:1px solid #1A2332">
+        <div class="flex items-center gap-2">
+          <span class="platform-badge badge-${p.toLowerCase()}">${p}</span>
+          <span class="text-sm" style="color:var(--muted)">${d.trips} رحلة</span>
+        </div>
+        <span class="font-mono font-bold">${d.gross.toFixed(0)} درهم</span>
+      </div>
+    `).join('');
+  }
+
+  // Shift history
+  const histEl = document.getElementById('shift-history-list');
+  const recent = [...state.shifts].reverse().slice(0,5);
+  if (recent.length === 0) {
+    histEl.innerHTML = '<p class="text-sm text-center py-2" style="color:var(--muted)">ما كاينش خدمات</p>';
+  } else {
+    histEl.innerHTML = recent.map(sh => `
+      <div class="flex justify-between py-2" style="border-bottom:1px solid #1A2332">
+        <div>
+          <p class="text-sm font-bold">${sh.date}</p>
+          <p class="text-xs" style="color:var(--muted)">${fmtDuration(sh.duration)} · ${sh.km}km · ${sh.tripCount} رحلات</p>
+        </div>
+        <div class="text-right">
+          <p class="font-mono font-bold" style="color:var(--brand)">${sh.net.toFixed(0)}</p>
+          <p class="text-xs" style="color:var(--muted)">صافي</p>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function refreshSettings() {
+  document.getElementById('settings-fuel-price').value = state.fuelPrice;
+  document.getElementById('settings-daily-target').value = state.dailyTarget;
+  document.getElementById('settings-commission').value = state.commission;
+  if (state.vehicle) {
+    document.getElementById('settings-vehicle-name').textContent = state.vehicle.name;
+    document.getElementById('settings-vehicle-cons').textContent = state.vehicle.cons + 'L/100km';
+  }
+  // Mini vehicle grid in settings
+  const grid = document.getElementById('settings-vehicle-grid');
+  grid.innerHTML = VEHICLES.map(v=>`
+    <div class="vehicle-chip ${state.vehicle?.id===v.id?'selected':''} text-xs" onclick="selectSettingsVehicle('${v.id}')">
+      ${v.icon} ${v.name.split(' ').slice(0,2).join(' ')}
+    </div>
+  `).join('');
+}
+
+function selectSettingsVehicle(id) {
+  state.vehicle = VEHICLES.find(v=>v.id===id);
+  saveState();
+  refreshSettings();
+  showToast('تم تغيير السيارة ✓');
+}
+
+function saveFuelPrice() {
+  state.fuelPrice = parseFloat(document.getElementById('settings-fuel-price').value) || 14.5;
+  saveState();
+  showToast('تم حفظ سعر الكاربوران ✓');
+}
+
+function saveDailyTarget() {
+  state.dailyTarget = parseInt(document.getElementById('settings-daily-target').value) || 200;
+  saveState();
+  showToast('تم حفظ الهدف ✓');
+}
+
+function saveCommission() {
+  state.commission = parseFloat(document.getElementById('settings-commission').value) || 10;
+  saveState();
+  showToast('تم حفظ الكوميسيون ✓');
+}
+
+function clearAllData() {
+  if (!confirm('واش حقاً بغيتي تمسح كل البيانات؟')) return;
+  localStorage.removeItem('flousi_state');
+  location.reload();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  loadState();
+
+  if (!state.onboarded) {
+    showScreen('onboard');
+  } else {
+    document.getElementById('bottom-nav').classList.remove('hidden');
+    showScreen('home');
+    if (state.shiftActive && state.shiftStart) {
+      shiftInterval = setInterval(updateShiftUI, 1000);
+      updateShiftUI();
+    }
+  }
+}
+
+init();
+</script>
+</body>
+</html>
